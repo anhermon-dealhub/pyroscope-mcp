@@ -23,7 +23,7 @@ A read-only [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) ser
 ## Setup
 
 ```bash
-git clone https://github.com/anhermon-dealhub/pyroscope-mcp
+git clone https://github.com/your-org/pyroscope-mcp
 cd pyroscope-mcp
 npm ci
 npm run build
