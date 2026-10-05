@@ -18,7 +18,6 @@ type RequestOptions = {
   query?: Record<string, string | number | undefined>;
   body?: unknown;
   tenantId?: string;
-  baseUrl?: string;
 };
 
 function formatResponsePreview(payload: unknown): string {
@@ -40,7 +39,7 @@ async function pyroscopeRequest(options: RequestOptions): Promise<unknown> {
       ).toString()
     : "";
 
-  const baseUrl = (options.baseUrl ?? DEFAULT_BASE_URL).replace(/\/$/, "");
+  const baseUrl = DEFAULT_BASE_URL.replace(/\/$/, "");
   const url = `${baseUrl}${options.endpoint}${queryString ? `?${queryString}` : ""}`;
 
   const headers: Record<string, string> = {
@@ -99,9 +98,8 @@ server.tool(
     maxNodes: z.number().int().positive().optional().describe("Maximum nodes in returned flamegraph."),
     groupBy: z.string().optional().describe("Single label to group timeline by."),
     tenantId: z.string().optional().describe("Optional per-request tenant override."),
-    baseUrl: z.string().url().optional().describe("Optional per-request Pyroscope base URL override."),
   },
-  async ({ query, from, until, format, maxNodes, groupBy, tenantId, baseUrl }) => {
+  async ({ query, from, until, format, maxNodes, groupBy, tenantId }) => {
     const payload = await pyroscopeRequest({
       method: "GET",
       endpoint: "/pyroscope/render",
@@ -114,7 +112,6 @@ server.tool(
         groupBy,
       },
       tenantId,
-      baseUrl,
     });
 
     return {
@@ -131,14 +128,12 @@ server.tool(
     end: z.number().int().optional().describe("End timestamp in milliseconds since epoch."),
     matchers: z.array(z.string()).optional().describe("Optional label selectors."),
     tenantId: z.string().optional(),
-    baseUrl: z.string().url().optional(),
   },
-  async ({ start, end, matchers, tenantId, baseUrl }) => {
+  async ({ start, end, matchers, tenantId }) => {
     const payload = await pyroscopeRequest({
       endpoint: "/querier.v1.QuerierService/LabelNames",
       body: { start, end, matchers },
       tenantId,
-      baseUrl,
     });
 
     return {
@@ -156,14 +151,12 @@ server.tool(
     end: z.number().int().optional().describe("End timestamp in milliseconds since epoch."),
     matchers: z.array(z.string()).optional().describe("Optional label selectors."),
     tenantId: z.string().optional(),
-    baseUrl: z.string().url().optional(),
   },
-  async ({ name, start, end, matchers, tenantId, baseUrl }) => {
+  async ({ name, start, end, matchers, tenantId }) => {
     const payload = await pyroscopeRequest({
       endpoint: "/querier.v1.QuerierService/LabelValues",
       body: { name, start, end, matchers },
       tenantId,
-      baseUrl,
     });
 
     return {
@@ -179,14 +172,12 @@ server.tool(
     start: z.number().int().optional().describe("Start timestamp in milliseconds since epoch."),
     end: z.number().int().optional().describe("End timestamp in milliseconds since epoch."),
     tenantId: z.string().optional(),
-    baseUrl: z.string().url().optional(),
   },
-  async ({ start, end, tenantId, baseUrl }) => {
+  async ({ start, end, tenantId }) => {
     const payload = await pyroscopeRequest({
       endpoint: "/querier.v1.QuerierService/ProfileTypes",
       body: { start, end },
       tenantId,
-      baseUrl,
     });
 
     return {
@@ -204,14 +195,12 @@ server.tool(
     matchers: z.array(z.string()).optional().describe("Matchers like {service_name=\"checkout\"}."),
     labelNames: z.array(z.string()).optional().describe("Optional label names to return."),
     tenantId: z.string().optional(),
-    baseUrl: z.string().url().optional(),
   },
-  async ({ start, end, matchers, labelNames, tenantId, baseUrl }) => {
+  async ({ start, end, matchers, labelNames, tenantId }) => {
     const payload = await pyroscopeRequest({
       endpoint: "/querier.v1.QuerierService/Series",
       body: { start, end, matchers, labelNames },
       tenantId,
-      baseUrl,
     });
 
     return {
@@ -230,14 +219,12 @@ server.tool(
       .describe("Connect query endpoint path, e.g. /querier.v1.QuerierService/SelectMergeStacktraces"),
     body: z.record(z.unknown()).describe("Raw JSON body for the selected endpoint."),
     tenantId: z.string().optional(),
-    baseUrl: z.string().url().optional(),
   },
-  async ({ endpoint, body, tenantId, baseUrl }) => {
+  async ({ endpoint, body, tenantId }) => {
     const payload = await pyroscopeRequest({
       endpoint,
       body,
       tenantId,
-      baseUrl,
     });
 
     return {
