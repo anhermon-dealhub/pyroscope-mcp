@@ -3,7 +3,7 @@
     "pyroscope": {
       "type": "stdio",
       "command": "node",
-      "args": ["/Users/mahidhar/Desktop/pyroscope-mcp/dist/index.js"],
+      "args": ["${workspaceFolder}/dist/index.js"],
       "env": {
         "PYROSCOPE_BASE_URL": "http://localhost:4040"
       }

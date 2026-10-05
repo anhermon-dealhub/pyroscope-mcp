@@ -25,7 +25,7 @@ A read-only [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) ser
 ```bash
 git clone https://github.com/your-org/pyroscope-mcp
 cd pyroscope-mcp
-npm install
+npm ci
 npm run build
 ```
 
@@ -208,6 +208,7 @@ Add to your Zed `settings.json` (open via **Zed → Settings**):
 ## Notes
 
 - For multi-tenant Pyroscope, set `PYROSCOPE_TENANT_ID` or pass `tenantId` per tool call.
+- The Pyroscope URL comes only from `PYROSCOPE_BASE_URL`. Tools cannot override it, so a prompt-injected tool call cannot send `PYROSCOPE_AUTH_TOKEN` to another host.
 - `pyroscope_connect_query` gives raw access to advanced endpoints:
   - `/querier.v1.QuerierService/SelectMergeStacktraces`
   - `/querier.v1.QuerierService/SelectSeries`
