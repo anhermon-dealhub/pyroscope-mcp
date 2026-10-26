@@ -29,6 +29,8 @@ npm ci
 npm run build
 ```
 
+The package declares a `pyroscope-mcp` bin and a `prepare` script, so it can also be run with `npx github:anhermon-dealhub/pyroscope-mcp#<sha>`.
+
 ## Configuration
 
 All settings are provided via environment variables:
@@ -36,9 +38,12 @@ All settings are provided via environment variables:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `PYROSCOPE_BASE_URL` | `http://localhost:4040` | Pyroscope server URL |
-| `PYROSCOPE_AUTH_TOKEN` | — | Bearer token (Grafana Cloud or Azure AD) |
+| `PYROSCOPE_AUTH_TOKEN` | — | Bearer token (Grafana Cloud or Azure AD). Never sent over `http://` to a non-loopback host; use `https://` |
 | `PYROSCOPE_TENANT_ID` | — | Multi-tenant org ID (`X-Scope-OrgID` header) |
-| `PYROSCOPE_TIMEOUT_MS` | `30000` | Request timeout in milliseconds |
+| `PYROSCOPE_ALLOW_TENANT_OVERRIDE` | `false` | Set to `true` to let tool calls pass their own `tenantId`. When unset, `tenantId` is not exposed and is ignored |
+| `PYROSCOPE_TIMEOUT_MS` | `30000` | Request timeout in milliseconds. Must be a positive integer; invalid values fall back to `30000` and log a line to stderr |
+
+Connect tools (`pyroscope_label_names`, `pyroscope_label_values`, `pyroscope_profile_types`, `pyroscope_series`) default `start`/`end` to the last hour (now-1h to now) when omitted, because Pyroscope v2 rejects queries without a time range. Explicit values are used as given. Responses larger than 10 MB are rejected, and error bodies are truncated to about 2 KB.
 
 Copy `.env.example` to `.env` and fill in your values:
 
@@ -207,7 +212,7 @@ Add to your Zed `settings.json` (open via **Zed → Settings**):
 
 ## Notes
 
-- For multi-tenant Pyroscope, set `PYROSCOPE_TENANT_ID` or pass `tenantId` per tool call.
+- For multi-tenant Pyroscope, set `PYROSCOPE_TENANT_ID`. Per-call `tenantId` is only available when `PYROSCOPE_ALLOW_TENANT_OVERRIDE=true`, because the configured bearer token is attached to every request.
 - The Pyroscope URL comes only from `PYROSCOPE_BASE_URL`. Tools cannot override it, so a prompt-injected tool call cannot send `PYROSCOPE_AUTH_TOKEN` to another host.
 - `pyroscope_connect_query` gives raw access to advanced endpoints:
   - `/querier.v1.QuerierService/SelectMergeStacktraces`
